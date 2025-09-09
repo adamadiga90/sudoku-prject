@@ -8,25 +8,44 @@ export function useGameDifficultyContext() {
 const GameProvider = ({ children }) => {
   const [gameDifficulty, setGameDifficulty] = useState(true);
   const [gameData, setGameData] = useState("");
-  const [selected, setSelected] = useState("Medium");
+  const [selected, setSelected] = useState("easy");
+
+  // async function getGameApi() {
+  //   try {
+  //     const response = await fetch("https://sudoku-api.vercel.app/api/dosuku");
+  //     const data = await response.json();
+  //     if (data) {
+  //       setGameData(data.newboard.grids[0]);
+  //     }
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // }
+  // console.log(gameData);
 
   async function getGameApi() {
     try {
-      const response = await fetch("https://sudoku-api.vercel.app/api/dosuku");
+      const response = await fetch(
+        `https://api.api-ninjas.com/v1/sudokugenerate?difficulty=${selected}`, // Note the corrected endpoint
+        {
+          headers: { "X-Api-Key": "ibbML3pr4zY9nHhnK1iKPg==3FRJa25FAHDmFcug" },
+        }
+      );
       const data = await response.json();
       if (data) {
-        setGameData(data.newboard.grids[0]);
+        setGameData(data);
+        console.log(data);
       }
     } catch (e) {
-      console.log(e);
+      console.error("Fetch error:", e);
     }
-  }
-  if (gameData.difficulty !== selected) {
-    getGameApi();
   }
   useEffect(() => {
     getGameApi();
   }, []);
+  // useEffect(() => {
+  //   getGameApi();
+  // }, []);
   const values = {
     gameData,
     gameDifficulty,

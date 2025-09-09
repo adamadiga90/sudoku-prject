@@ -18,8 +18,9 @@ const Info = ({ isVisible, setIsVisible }) => {
           value={selected}
           onChange={(e) => changeDifficulty(e)}
         >
-          <option value="Medium">Medium</option>
-          <option value="Hard">Hard</option>
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
         </select>
       </div>
     </div>
