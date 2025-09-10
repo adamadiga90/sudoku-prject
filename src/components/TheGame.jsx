@@ -136,6 +136,7 @@ const TheGame = () => {
   const [gamePuzzle, setGamePuzzle] = useState([]);
   const [solution, setSolution] = useState([]);
   const [selected, setSelected] = useState();
+  const [mistakesCounter, setMistakesCounter] = useState(0);
   const [gameNumbers, setGameNumber] = useState([
     1,
     2,
@@ -146,46 +147,45 @@ const TheGame = () => {
     7,
     8,
     9,
-    "Delete",
+    "D",
   ]);
-
   function makeGame() {
     if (gameData && gameData.puzzle && gameData.puzzle.length > 0) {
-      // console.log(gameData.solution);
       setGamePuzzle(gameData.puzzle);
       setSolution(gameData.solution);
     }
+    // let newNew = gamePuzzle;
+    // newNew[0][0] = "1";
   }
-  localStorage.setItem("game-data", JSON.stringify(gameData));
-  localStorage.setItem("game-puzzle", gamePuzzle);
-  localStorage.setItem("game-solution", solution);
-  console.log(solution);
 
   function handleBoxClick(box, rIndex, index) {
-    if (gameData.puzzle[rIndex][index] === null) {
-      setSelected([rIndex, index, solution[rIndex][index]]);
-      if (selected) {
-        console.log([selected[0], selected[1]]);
-      }
-    }
+    console.log(gamePuzzle[rIndex]);
+
+    // if (gameData.puzzle[rIndex][index] === null) {
+    setSelected([rIndex, index, solution[rIndex][index]]);
+    // if (selected) {
+    //   // console.log([selected[0], selected[1]]);
+    //   console.log(solution[selected[0]][selected[1]]);
+    // }
+    // }
   }
 
   function handleNumberClick(e) {
     let newGameArray = gamePuzzle;
-    if (selected) {
-      console.log(e.target.innerHTML);
-      console.log(solution[selected[0]][selected[1]]);
+    console.log(selected);
 
-      if (
-        newGameArray[selected[0]][selected[1]] ===
-        solution[selected[0]][selected[1]]
-      ) {
+    if (selected) {
+      // console.log(e.target.innerHTML);
+      // console.log(solution[selected[0]][selected[1]]);
+      // console.log(+e.target.innerHTML);
+
+      if (+e.target.innerHTML === solution[selected[0]][selected[1]]) {
         newGameArray[selected[0]][selected[1]] = e.target.innerHTML;
       } else {
         newGameArray[selected[0]][selected[1]] = [e.target.innerHTML];
       }
-      console.log(typeof gamePuzzle[selected[0]][selected[1]]);
-      console.log(gamePuzzle[selected[0]]);
+      // console.log(typeof gamePuzzle[selected[0]][selected[1]]);
+      // console.log(gamePuzzle[selected[0]]);
 
       setGamePuzzle(newGameArray);
       setSelected();
@@ -216,12 +216,14 @@ const TheGame = () => {
       document.removeEventListener("click", handleContainerClick);
     };
   }, []);
+  console.log(typeof null);
+
   return (
     <div className="h-[calc(100vh-100px)] w-screen flex flex-col  items-center justify-center ">
       <div
         id="game-container"
         ref={gameContainer}
-        className="relative border-black border-4 border-solid"
+        className="relative  border-black border-4 border-solid"
       >
         <span className="block w-full h-2 bg-black absolute top-[33%]"></span>
         <span className="block w-full h-2 bg-black absolute top-[66%]"></span>
@@ -230,31 +232,79 @@ const TheGame = () => {
         {gamePuzzle && gamePuzzle.length > 0
           ? gamePuzzle.map((row, rIndex) => (
               <div className="flex " key={`x${rIndex}`}>
-                {row.map((box, index) =>
-                  gameData.puzzle[rIndex][index] !== null ? (
-                    <span
-                      className="flex justify-center items-center border text-6xl font-bold border-black border-solid w-20 h-20"
-                      key={index}
-                    >
-                      {box}
-                    </span>
-                  ) : typeof box === "string" ? (
-                    <span
-                      onClick={() => handleBoxClick(box, rIndex, index)}
-                      className="cursor-pointer flex justify-center items-center border text-6xl font-bold border-black border-solid w-20 h-20"
-                      key={index}
-                    >
-                      {box}
-                    </span>
-                  ) : (
-                    <span
-                      onClick={() => handleBoxClick(box, rIndex, index)}
-                      className="cursor-pointer flex justify-center items-center border text-6xl font-bold border-black border-solid w-20 h-20"
-                      key={index}
-                    >
-                      {box}
-                    </span>
-                  )
+                {row.map(
+                  (box, index) =>
+                    // gameData.puzzle[rIndex][index] === null ? (
+                    typeof box === "number" ? (
+                      <span className="font-bold  flex justify-center items-center border text-6xl border-black border-solid w-20 h-20">
+                        {+box}
+                      </span>
+                    ) : typeof box === "string" ? (
+                      <span
+                        onClick={() => handleBoxClick(box, rIndex, index)}
+                        className={`${
+                          selected &&
+                          selected[0] === rIndex &&
+                          selected[1] === index
+                            ? "bg-slate-200"
+                            : "bg-white"
+                        } cursor-pointer font-bold text-blue-500 flex justify-center items-center border text-6xl border-black border-solid w-20 h-20`}
+                      >
+                        {+box}
+                      </span>
+                    ) : typeof box === "object" && box !== null ? (
+                      <span
+                        onClick={() => handleBoxClick(box, rIndex, index)}
+                        className={`${
+                          selected &&
+                          selected[0] === rIndex &&
+                          selected[1] === index
+                            ? "bg-slate-200"
+                            : "bg-white"
+                        } cursor-pointer font-bold text-red-500 flex justify-center items-center border text-6xl border-black border-solid w-20 h-20`}
+                      >
+                        {box}
+                      </span>
+                    ) : (
+                      <span
+                        onClick={() => handleBoxClick(box, rIndex, index)}
+                        className={`${
+                          selected &&
+                          selected[0] === rIndex &&
+                          selected[1] === index
+                            ? "bg-slate-200"
+                            : "bg-white"
+                        } cursor-pointer font-bold  flex justify-center items-center border text-6xl border-black border-solid w-20 h-20`}
+                      >
+                        {box}
+                      </span>
+                    )
+                  // (
+                  //   typeof box === "object" ? (
+                  //     <span
+                  // onClick={() => handleBoxClick(box, rIndex, index)}
+                  //       className="cursor-pointer text-red flex justify-center items-center border text-6xl font-bold border-black border-solid w-20 h-20"
+                  //       key={index}
+                  //     >
+                  //       {box}
+                  //     </span>
+                  //   ) : (
+                  //     <span
+                  //       onClick={() => handleBoxClick(box, rIndex, index)}
+                  //       className="cursor-pointer text-blue flex justify-center items-center border text-6xl font-bold border-black border-solid w-20 h-20"
+                  //       key={index}
+                  //     >
+                  //       {box}
+                  //     </span>
+                  //   )
+                  // ) : (
+                  //   <span
+                  // className="flex justify-center items-center border text-6xl font-bold border-black border-solid w-20 h-20"
+                  //     key={index}
+                  //   >
+                  //     {box}
+                  //   </span>
+                  // )
                 )}
               </div>
             ))
