@@ -156,16 +156,39 @@ const TheGame = () => {
       setSolution(gameData.solution);
     }
   }
+  localStorage.setItem("game-data", JSON.stringify(gameData));
+  localStorage.setItem("game-puzzle", gamePuzzle);
+  localStorage.setItem("game-solution", solution);
+  console.log(solution);
 
   function handleBoxClick(box, rIndex, index) {
     if (gameData.puzzle[rIndex][index] === null) {
       setSelected([rIndex, index, solution[rIndex][index]]);
+      if (selected) {
+        console.log([selected[0], selected[1]]);
+      }
     }
   }
 
   function handleNumberClick(e) {
-    if (selected !== null) {
-      console.log(e.target.value);
+    let newGameArray = gamePuzzle;
+    if (selected) {
+      console.log(e.target.innerHTML);
+      console.log(solution[selected[0]][selected[1]]);
+
+      if (
+        newGameArray[selected[0]][selected[1]] ===
+        solution[selected[0]][selected[1]]
+      ) {
+        newGameArray[selected[0]][selected[1]] = e.target.innerHTML;
+      } else {
+        newGameArray[selected[0]][selected[1]] = [e.target.innerHTML];
+      }
+      console.log(typeof gamePuzzle[selected[0]][selected[1]]);
+      console.log(gamePuzzle[selected[0]]);
+
+      setGamePuzzle(newGameArray);
+      setSelected();
     }
   }
 
@@ -174,12 +197,17 @@ const TheGame = () => {
   }, [gameData]);
 
   const gameContainer = useRef(null);
+  const numbersContainer = useRef(null);
 
   useEffect(() => {
     const handleContainerClick = (e) => {
       // console.log(gameContainer.current);
 
-      if (gameContainer.current && !gameContainer.current.contains(e.target)) {
+      if (
+        gameContainer.current &&
+        !gameContainer.current.contains(e.target) &&
+        !numbersContainer.current.contains(e.target)
+      ) {
         setSelected();
       }
     };
@@ -203,7 +231,14 @@ const TheGame = () => {
           ? gamePuzzle.map((row, rIndex) => (
               <div className="flex " key={`x${rIndex}`}>
                 {row.map((box, index) =>
-                  gameData.puzzle[rIndex][index] === null ? (
+                  gameData.puzzle[rIndex][index] !== null ? (
+                    <span
+                      className="flex justify-center items-center border text-6xl font-bold border-black border-solid w-20 h-20"
+                      key={index}
+                    >
+                      {box}
+                    </span>
+                  ) : typeof box === "string" ? (
                     <span
                       onClick={() => handleBoxClick(box, rIndex, index)}
                       className="cursor-pointer flex justify-center items-center border text-6xl font-bold border-black border-solid w-20 h-20"
@@ -213,7 +248,8 @@ const TheGame = () => {
                     </span>
                   ) : (
                     <span
-                      className="flex justify-center items-center border text-6xl font-bold border-black border-solid w-20 h-20"
+                      onClick={() => handleBoxClick(box, rIndex, index)}
+                      className="cursor-pointer flex justify-center items-center border text-6xl font-bold border-black border-solid w-20 h-20"
                       key={index}
                     >
                       {box}
@@ -224,7 +260,7 @@ const TheGame = () => {
             ))
           : null}
       </div>
-      <div className="flex ">
+      <div className="flex" ref={numbersContainer}>
         {gameNumbers.map((number) => (
           <span
             key={number}
