@@ -1,3 +1,220 @@
+import React, { useEffect, useRef, useState } from "react";
+import { useGameDifficultyContext } from "../gameContext";
+import { FaHeart } from "react-icons/fa";
+const TheGame = () => {
+  const { gameData, getGameApi } = useGameDifficultyContext();
+
+  const [gamePuzzle, setGamePuzzle] = useState([]);
+  const [solution, setSolution] = useState([]);
+  const [selected, setSelected] = useState();
+  const [mistakesCounter, setMistakesCounter] = useState(0);
+  const [gameNumbers, setGameNumber] = useState([
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    "D",
+  ]);
+  function makeGame() {
+    if (gameData && gameData.puzzle && gameData.puzzle.length > 0) {
+      setGamePuzzle(JSON.parse(JSON.stringify(gameData.puzzle)));
+      setSolution(gameData.solution);
+    }
+  }
+
+  function handleBoxClick(box, rIndex, index) {
+    setSelected([rIndex, index, solution[rIndex][index]]);
+  }
+
+  function handleNumberClick(e) {
+    let newGameArray = gamePuzzle;
+
+    if (selected) {
+      if (e.target.innerHTML !== "D") {
+        if (+e.target.innerHTML === solution[selected[0]][selected[1]]) {
+          newGameArray[selected[0]][selected[1]] = e.target.innerHTML;
+        } else {
+          newGameArray[selected[0]][selected[1]] = [e.target.innerHTML];
+          setMistakesCounter((prevMistakesCounter) => prevMistakesCounter + 1);
+        }
+      } else {
+        newGameArray[selected[0]][selected[1]] = null;
+      }
+    }
+    console.log(gamePuzzle[selected[0]]);
+    console.log(gameData.puzzle[selected[0]]);
+    console.log(gameData);
+    setGamePuzzle(newGameArray);
+    setSelected();
+  }
+
+  useEffect(() => {
+    makeGame();
+  }, [gameData]);
+
+  const gameContainer = useRef(null);
+  const numbersContainer = useRef(null);
+
+  useEffect(() => {
+    const handleContainerClick = (e) => {
+      if (
+        gameContainer.current &&
+        !gameContainer.current.contains(e.target) &&
+        !numbersContainer.current.contains(e.target)
+      ) {
+        setSelected();
+      }
+    };
+    document.addEventListener("click", handleContainerClick);
+    return () => {
+      document.removeEventListener("click", handleContainerClick);
+    };
+  }, []);
+
+  function handleRestartGame() {
+    makeGame();
+    setMistakesCounter(0);
+  }
+  function handleNewGame() {
+    getGameApi();
+    setMistakesCounter(0);
+  }
+
+  return (
+    <div className="relative h-[calc(100vh-100px)] w-screen flex flex-col  items-center justify-center ">
+      {mistakesCounter === 3 ? (
+        <div className="absolute w-[490px] h-[490px] bg-[#f4ce14de] z-10 flex justify-center items-center flex-col text-4xl font-bold gap-[100px]">
+          <h1>You Lost</h1>
+          <div className="flex justify-center items-center gap-5">
+            <button
+              onClick={handleRestartGame}
+              className="bg-[#45474B] text-white transition p-2 hover:bg-gray-800 hover:text-[#F4CE14]"
+            >
+              Restart Game
+            </button>
+
+            <button
+              onClick={handleNewGame}
+              className="bg-[#45474B] text-white transition p-2 hover:bg-gray-800 hover:text-[#F4CE14]"
+            >
+              New Game
+            </button>
+          </div>
+        </div>
+      ) : null}
+      <div className="flex gap-2">
+        {/* <FaHeart key={index} className="text-4xl text-red-500 mb-2" /> */}
+
+        {Array.from({ length: 3 }).map((_, index) =>
+          index < mistakesCounter ? (
+            <FaHeart key={index} className="text-4xl text-gray-500 mb-2" />
+          ) : (
+            <FaHeart key={index} className="text-4xl text-red-500 mb-2" />
+          )
+        )}
+      </div>
+      <div
+        id="game-container"
+        ref={gameContainer}
+        className="relative  border-black border-4 border-solid"
+      >
+        <span className="block w-full h-2 bg-black absolute top-[33%]"></span>
+        <span className="block w-full h-2 bg-black absolute top-[66%]"></span>
+        <span className="block w-2 h-full bg-black absolute left-[66%]"></span>
+        <span className="block w-2 h-full bg-black absolute left-[33%]"></span>
+        {gamePuzzle && gamePuzzle.length > 0
+          ? gamePuzzle.map((row, rIndex) => (
+              <div className="flex " key={`x${rIndex}`}>
+                {row.map((box, index) =>
+                  typeof box === "number" ? (
+                    <span
+                      key={index}
+                      className="font-bold  flex justify-center items-center border text-6xl border-black border-solid w-20 h-20"
+                    >
+                      {+box}
+                    </span>
+                  ) : typeof box === "string" ? (
+                    <span
+                      key={index}
+                      onClick={() => handleBoxClick(box, rIndex, index)}
+                      className={`${
+                        selected &&
+                        selected[0] === rIndex &&
+                        selected[1] === index
+                          ? "bg-slate-200"
+                          : "bg-white"
+                      } cursor-pointer font-bold text-blue-500 flex justify-center items-center border text-6xl border-black border-solid w-20 h-20`}
+                    >
+                      {+box}
+                    </span>
+                  ) : typeof box === "object" && box !== null ? (
+                    <span
+                      key={index}
+                      onClick={() => handleBoxClick(box, rIndex, index)}
+                      className={`${
+                        selected &&
+                        selected[0] === rIndex &&
+                        selected[1] === index
+                          ? "bg-slate-200"
+                          : "bg-white"
+                      } cursor-pointer font-bold text-red-500 flex justify-center items-center border text-6xl border-black border-solid w-20 h-20`}
+                    >
+                      {box}
+                    </span>
+                  ) : (
+                    <span
+                      key={index}
+                      onClick={() => handleBoxClick(box, rIndex, index)}
+                      className={`${
+                        selected &&
+                        selected[0] === rIndex &&
+                        selected[1] === index
+                          ? "bg-slate-200"
+                          : "bg-white"
+                      } cursor-pointer font-bold  flex justify-center items-center border text-6xl border-black border-solid w-20 h-20`}
+                    >
+                      {box}
+                    </span>
+                  )
+                )}
+              </div>
+            ))
+          : null}
+      </div>
+      <div className="flex" ref={numbersContainer}>
+        {gameNumbers.map((number) => (
+          <span
+            key={number}
+            onClick={(e) => handleNumberClick(e)}
+            className="border-2 border-solid border-black w-24 h-16 text-2xl font-bold flex justify-center items-center mt-5"
+          >
+            {number}
+          </span>
+        ))}
+        <span>{selected}</span>
+      </div>
+    </div>
+  );
+};
+
+export default TheGame;
+
+// [
+//   [0, 0, 4, 0, 0, 0, 0, 0, 7],
+//   [0, 0, 0, 9, 0, 0, 0, 0, 0],
+//   [0, 0, 0, 0, 4, 0, 9, 0, 1],
+//   [1, 0, 0, 2, 0, 0, 0, 6, 3],
+//   [0, 0, 6, 0, 0, 0, 1, 0, 2],
+//   [0, 2, 0, 8, 0, 1, 0, 0, 4],
+//   [9, 0, 8, 0, 0, 0, 0, 0, 6],
+//   [7, 3, 1, 0, 0, 0, 0, 4, 0],
+//   [0, 0, 2, 1, 0, 0, 0, 0, 5],
+// ];
 // import React, { useContext, useEffect, useState } from "react";
 // import { useGameDifficultyContext } from "../gameContext";
 
@@ -127,215 +344,3 @@
 // };
 
 // export default TheGame;
-import React, { useEffect, useRef, useState } from "react";
-import { useGameDifficultyContext } from "../gameContext";
-
-const TheGame = () => {
-  const { gameData } = useGameDifficultyContext();
-
-  const [gamePuzzle, setGamePuzzle] = useState([]);
-  const [solution, setSolution] = useState([]);
-  const [selected, setSelected] = useState();
-  const [mistakesCounter, setMistakesCounter] = useState(0);
-  const [gameNumbers, setGameNumber] = useState([
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    "D",
-  ]);
-  function makeGame() {
-    if (gameData && gameData.puzzle && gameData.puzzle.length > 0) {
-      setGamePuzzle(gameData.puzzle);
-      setSolution(gameData.solution);
-    }
-    // let newNew = gamePuzzle;
-    // newNew[0][0] = "1";
-  }
-
-  function handleBoxClick(box, rIndex, index) {
-    console.log(gamePuzzle[rIndex]);
-
-    // if (gameData.puzzle[rIndex][index] === null) {
-    setSelected([rIndex, index, solution[rIndex][index]]);
-    // if (selected) {
-    //   // console.log([selected[0], selected[1]]);
-    //   console.log(solution[selected[0]][selected[1]]);
-    // }
-    // }
-  }
-
-  function handleNumberClick(e) {
-    let newGameArray = gamePuzzle;
-    console.log(selected);
-
-    if (selected) {
-      // console.log(e.target.innerHTML);
-      // console.log(solution[selected[0]][selected[1]]);
-      // console.log(+e.target.innerHTML);
-
-      if (+e.target.innerHTML === solution[selected[0]][selected[1]]) {
-        newGameArray[selected[0]][selected[1]] = e.target.innerHTML;
-      } else {
-        newGameArray[selected[0]][selected[1]] = [e.target.innerHTML];
-      }
-      // console.log(typeof gamePuzzle[selected[0]][selected[1]]);
-      // console.log(gamePuzzle[selected[0]]);
-
-      setGamePuzzle(newGameArray);
-      setSelected();
-    }
-  }
-
-  useEffect(() => {
-    makeGame();
-  }, [gameData]);
-
-  const gameContainer = useRef(null);
-  const numbersContainer = useRef(null);
-
-  useEffect(() => {
-    const handleContainerClick = (e) => {
-      // console.log(gameContainer.current);
-
-      if (
-        gameContainer.current &&
-        !gameContainer.current.contains(e.target) &&
-        !numbersContainer.current.contains(e.target)
-      ) {
-        setSelected();
-      }
-    };
-    document.addEventListener("click", handleContainerClick);
-    return () => {
-      document.removeEventListener("click", handleContainerClick);
-    };
-  }, []);
-  console.log(typeof null);
-
-  return (
-    <div className="h-[calc(100vh-100px)] w-screen flex flex-col  items-center justify-center ">
-      <div
-        id="game-container"
-        ref={gameContainer}
-        className="relative  border-black border-4 border-solid"
-      >
-        <span className="block w-full h-2 bg-black absolute top-[33%]"></span>
-        <span className="block w-full h-2 bg-black absolute top-[66%]"></span>
-        <span className="block w-2 h-full bg-black absolute left-[66%]"></span>
-        <span className="block w-2 h-full bg-black absolute left-[33%]"></span>
-        {gamePuzzle && gamePuzzle.length > 0
-          ? gamePuzzle.map((row, rIndex) => (
-              <div className="flex " key={`x${rIndex}`}>
-                {row.map(
-                  (box, index) =>
-                    // gameData.puzzle[rIndex][index] === null ? (
-                    typeof box === "number" ? (
-                      <span className="font-bold  flex justify-center items-center border text-6xl border-black border-solid w-20 h-20">
-                        {+box}
-                      </span>
-                    ) : typeof box === "string" ? (
-                      <span
-                        onClick={() => handleBoxClick(box, rIndex, index)}
-                        className={`${
-                          selected &&
-                          selected[0] === rIndex &&
-                          selected[1] === index
-                            ? "bg-slate-200"
-                            : "bg-white"
-                        } cursor-pointer font-bold text-blue-500 flex justify-center items-center border text-6xl border-black border-solid w-20 h-20`}
-                      >
-                        {+box}
-                      </span>
-                    ) : typeof box === "object" && box !== null ? (
-                      <span
-                        onClick={() => handleBoxClick(box, rIndex, index)}
-                        className={`${
-                          selected &&
-                          selected[0] === rIndex &&
-                          selected[1] === index
-                            ? "bg-slate-200"
-                            : "bg-white"
-                        } cursor-pointer font-bold text-red-500 flex justify-center items-center border text-6xl border-black border-solid w-20 h-20`}
-                      >
-                        {box}
-                      </span>
-                    ) : (
-                      <span
-                        onClick={() => handleBoxClick(box, rIndex, index)}
-                        className={`${
-                          selected &&
-                          selected[0] === rIndex &&
-                          selected[1] === index
-                            ? "bg-slate-200"
-                            : "bg-white"
-                        } cursor-pointer font-bold  flex justify-center items-center border text-6xl border-black border-solid w-20 h-20`}
-                      >
-                        {box}
-                      </span>
-                    )
-                  // (
-                  //   typeof box === "object" ? (
-                  //     <span
-                  // onClick={() => handleBoxClick(box, rIndex, index)}
-                  //       className="cursor-pointer text-red flex justify-center items-center border text-6xl font-bold border-black border-solid w-20 h-20"
-                  //       key={index}
-                  //     >
-                  //       {box}
-                  //     </span>
-                  //   ) : (
-                  //     <span
-                  //       onClick={() => handleBoxClick(box, rIndex, index)}
-                  //       className="cursor-pointer text-blue flex justify-center items-center border text-6xl font-bold border-black border-solid w-20 h-20"
-                  //       key={index}
-                  //     >
-                  //       {box}
-                  //     </span>
-                  //   )
-                  // ) : (
-                  //   <span
-                  // className="flex justify-center items-center border text-6xl font-bold border-black border-solid w-20 h-20"
-                  //     key={index}
-                  //   >
-                  //     {box}
-                  //   </span>
-                  // )
-                )}
-              </div>
-            ))
-          : null}
-      </div>
-      <div className="flex" ref={numbersContainer}>
-        {gameNumbers.map((number) => (
-          <span
-            key={number}
-            onClick={(e) => handleNumberClick(e)}
-            className="border-2 border-solid border-black w-24 h-16 text-2xl font-bold flex justify-center items-center mt-5"
-          >
-            {number}
-          </span>
-        ))}
-        <span>{selected}</span>
-      </div>
-    </div>
-  );
-};
-
-export default TheGame;
-
-// [
-//   [0, 0, 4, 0, 0, 0, 0, 0, 7],
-//   [0, 0, 0, 9, 0, 0, 0, 0, 0],
-//   [0, 0, 0, 0, 4, 0, 9, 0, 1],
-//   [1, 0, 0, 2, 0, 0, 0, 6, 3],
-//   [0, 0, 6, 0, 0, 0, 1, 0, 2],
-//   [0, 2, 0, 8, 0, 1, 0, 0, 4],
-//   [9, 0, 8, 0, 0, 0, 0, 0, 6],
-//   [7, 3, 1, 0, 0, 0, 0, 4, 0],
-//   [0, 0, 2, 1, 0, 0, 0, 0, 5],
-// ];

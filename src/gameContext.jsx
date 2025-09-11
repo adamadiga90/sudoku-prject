@@ -10,19 +10,6 @@ const GameProvider = ({ children }) => {
   const [gameData, setGameData] = useState("");
   const [selected, setSelected] = useState("easy");
 
-  // async function getGameApi() {
-  //   try {
-  //     const response = await fetch("https://sudoku-api.vercel.app/api/dosuku");
-  //     const data = await response.json();
-  //     if (data) {
-  //       setGameData(data.newboard.grids[0]);
-  //     }
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // }
-  // console.log(gameData);
-
   async function getGameApi() {
     try {
       const response = await fetch(
@@ -42,7 +29,7 @@ const GameProvider = ({ children }) => {
   }
   useEffect(() => {
     getGameApi();
-  }, []);
+  }, [selected]);
   // useEffect(() => {
   //   getGameApi();
   // }, []);
