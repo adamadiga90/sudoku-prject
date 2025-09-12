@@ -8,6 +8,7 @@ const TheGame = () => {
   const [solution, setSolution] = useState([]);
   const [selected, setSelected] = useState();
   const [mistakesCounter, setMistakesCounter] = useState(0);
+  const [winner, setWinner] = useState(false);
   const [gameNumbers, setGameNumber] = useState([
     1,
     2,
@@ -25,6 +26,24 @@ const TheGame = () => {
       setGamePuzzle(JSON.parse(JSON.stringify(gameData.puzzle)));
       setSolution(gameData.solution);
     }
+  }
+
+  function checkWinning() {
+    let checker = 0;
+    for (let y = 0; y < 9; y++) {
+      for (let i = 0; i < 9; i++) {
+        if (gamePuzzle[y][i] !== null) {
+          checker = checker + +gamePuzzle[y][i];
+        }
+      }
+    }
+    if (checker === 405) {
+      setWinner(true);
+      console.log("You are a winner");
+    }
+    console.log(checker);
+    console.log(45 * 9);
+    console.log(9 + 8 + 7 + 6 + 5 + 4 + 3 + 2 + 1);
   }
 
   function handleBoxClick(box, rIndex, index) {
@@ -45,6 +64,7 @@ const TheGame = () => {
       } else {
         newGameArray[selected[0]][selected[1]] = null;
       }
+      checkWinning();
     }
     console.log(gamePuzzle[selected[0]]);
     console.log(gameData.puzzle[selected[0]]);
@@ -87,9 +107,9 @@ const TheGame = () => {
 
   return (
     <div className="relative h-[calc(100vh-100px)] w-screen flex flex-col  items-center justify-center ">
-      {mistakesCounter === 3 ? (
+      {mistakesCounter === 3 || winner ? (
         <div className="absolute w-[490px] h-[490px] bg-[#f4ce14de] z-10 flex justify-center items-center flex-col text-4xl font-bold gap-[100px]">
-          <h1>You Lost</h1>
+          {winner ? <h1>You Won</h1> : <h1>You Lost</h1>}
           <div className="flex justify-center items-center gap-5">
             <button
               onClick={handleRestartGame}
