@@ -106,7 +106,7 @@ const TheGame = () => {
   }
 
   return (
-    <div className="relative h-[calc(100vh-100px)] w-screen flex flex-col  items-center justify-center ">
+    <div className="relative h-[calc(100vh-100px)] w-screen flex flex-col  items-center justify-center mt-5">
       {mistakesCounter === 3 || winner ? (
         <div className="absolute w-[490px] h-[490px] bg-[#f4ce14de] z-10 flex justify-center items-center flex-col text-4xl font-bold gap-[100px]">
           {winner ? <h1>You Won</h1> : <h1>You Lost</h1>}
