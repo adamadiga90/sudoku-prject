@@ -3,7 +3,7 @@ import React, { useState } from "react";
 const Navbar = () => {
   const [isVisible, setIsVisible] = useState(false);
   return (
-    <div className="bg-[#45474B] p-5 text-[#F4CE14] font-bold text-[30px] flex gap-40">
+    <div className="bg-[#45474B] p-5 text-[#F4CE14] font-bold text-[30px] flex gap-40 w-full">
       Sudoku
       <button
         onClick={() => setIsVisible(true)}
